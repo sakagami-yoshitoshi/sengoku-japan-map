@@ -3,7 +3,7 @@ export type BilingualText = {
   romaji: string
 }
 
-export type RegionId = 'kinki' | 'kanto' | 'chubu'
+export type RegionId = 'kinki' | 'kanto' | 'chubu' | 'chugoku' | 'shikoku' | 'kyushu' | 'tohoku'
 
 export type RegionData = {
   id: RegionId
