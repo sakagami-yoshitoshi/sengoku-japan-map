@@ -12,12 +12,14 @@ export default function HomePage() {
   const [hoveredRegionId, setHoveredRegionId] = useState<RegionId | null>(null)
 
   const selectedRegion = useMemo(() => getRegionById(selectedRegionId), [selectedRegionId])
+  const activeRegion = useMemo(() => getRegionById(hoveredRegionId ?? selectedRegionId), [hoveredRegionId, selectedRegionId])
 
   return (
-    <main className="grid min-h-screen gap-8 p-6 md:p-8 lg:grid-cols-[1.35fr_0.9fr] lg:p-10">
-      <section>
+    <main className="grid min-h-screen gap-6 p-4 md:gap-8 md:p-6 lg:grid-cols-[1.2fr_0.92fr] lg:gap-10 lg:p-10">
+      <section className="min-w-0">
         <PageHeader />
         <MapStage
+          activeRegion={activeRegion}
           regions={regions}
           selectedRegionId={selectedRegionId}
           hoveredRegionId={hoveredRegionId}
@@ -25,7 +27,10 @@ export default function HomePage() {
           onSelect={setSelectedRegionId}
         />
       </section>
-      <RegionInfoPanel region={selectedRegion} />
+
+      <div className="min-w-0 lg:sticky lg:top-10 lg:self-start">
+        <RegionInfoPanel key={selectedRegion.id} region={selectedRegion} />
+      </div>
     </main>
   )
 }

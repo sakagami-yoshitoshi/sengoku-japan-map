@@ -24,7 +24,7 @@ const regionLayout: Record<RegionId, RegionVisual> = {
     width: '19%',
     height: '18%',
     clipPath: 'polygon(18% 18%, 63% 6%, 90% 26%, 84% 72%, 48% 94%, 8% 70%, 10% 34%)',
-    labelClassName: 'pt-5 pl-5',
+    labelClassName: 'flex h-full flex-col items-center justify-center px-2 text-center',
   },
   chubu: {
     top: '27%',
@@ -32,7 +32,7 @@ const regionLayout: Record<RegionId, RegionVisual> = {
     width: '24%',
     height: '23%',
     clipPath: 'polygon(8% 40%, 20% 16%, 53% 6%, 83% 14%, 95% 40%, 81% 76%, 46% 95%, 14% 82%)',
-    labelClassName: 'pt-6 pl-6',
+    labelClassName: 'flex h-full flex-col items-center justify-center px-3 text-center',
   },
   kanto: {
     top: '26%',
@@ -40,7 +40,7 @@ const regionLayout: Record<RegionId, RegionVisual> = {
     width: '18%',
     height: '21%',
     clipPath: 'polygon(12% 24%, 44% 8%, 78% 19%, 92% 48%, 84% 82%, 42% 96%, 12% 74%, 4% 42%)',
-    labelClassName: 'pt-5 pl-4',
+    labelClassName: 'flex h-full flex-col items-center justify-center px-2 text-center',
   },
 }
 
@@ -123,9 +123,9 @@ export function JapanRegionsMap({ regions, selectedRegionId, hoveredRegionId, on
               onBlur={() => onHover(null)}
               onClick={() => onSelect(region.id)}
             >
-              <span className={`block ${box.labelClassName}`}>
-                <span className="block text-lg font-semibold leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]">{region.modern.ja}</span>
-                <span className="mt-2 block text-xs uppercase tracking-[0.22em] opacity-90">{region.modern.romaji}</span>
+              <span className={box.labelClassName}>
+                <span className="block text-sm font-semibold leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)] sm:text-base lg:text-lg">{region.modern.ja}</span>
+                <span className="mt-1 block text-[10px] uppercase tracking-[0.18em] opacity-90 sm:mt-2 sm:text-[11px] lg:text-xs">{region.modern.romaji}</span>
               </span>
             </button>
           )

@@ -36,12 +36,57 @@ body::before {
   pointer-events: none;
   opacity: 0.08;
   background-image:
-    linear-gradient(rgba(255,255,255,0.22) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.16) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
   background-size: 160px 160px;
   mix-blend-mode: soft-light;
 }
 
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background: radial-gradient(circle at 50% 12%, rgba(233, 175, 92, 0.08), transparent 28%);
+}
+
 button {
   font: inherit;
+}
+
+.sengoku-surface {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 224, 179, 0.03),
+    0 28px 80px rgba(0, 0, 0, 0.28);
+}
+
+.sengoku-panel {
+  animation: sengoku-fade-up 320ms ease-out;
+}
+
+@keyframes sengoku-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .sengoku-panel {
+    animation: none;
+  }
+
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
