@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { JAPAN_BOUNDS, OSM_RASTER_STYLE, REGION_BOUNDS, REGION_FEATURE_COLLECTION } from '@/lib/map/region-map-data'
+import { OSM_RASTER_STYLE, REGION_FEATURE_COLLECTION } from '@/lib/map/region-map-data'
+import { JAPAN_VIEW_BOUNDS, REGION_VIEW_BOUNDS } from '@/lib/map/region-view-bounds'
 import { RegionData, RegionId } from '@/types/region'
 
 type Props = {
@@ -137,7 +138,7 @@ export function JapanRegionsMap({ regions, selectedRegionId, hoveredRegionId, on
             onHoverRef.current(null)
           })
 
-          map.fitBounds(JAPAN_BOUNDS, { duration: 0, padding: 28 })
+          map.fitBounds(JAPAN_VIEW_BOUNDS, { duration: 0, padding: 28 })
           setMapReady(true)
         })
 
@@ -183,7 +184,7 @@ export function JapanRegionsMap({ regions, selectedRegionId, hoveredRegionId, on
 
   const fitToRegion = (regionId: RegionId) => {
     const map = mapRef.current
-    const bounds = REGION_BOUNDS[regionId]
+    const bounds = REGION_VIEW_BOUNDS[regionId]
     if (!map || !bounds || !loadedRef.current) {
       return
     }
