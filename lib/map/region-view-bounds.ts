@@ -2,10 +2,14 @@ import { RegionId } from '@/types/region'
 
 export const JAPAN_VIEW_BOUNDS: [[number, number], [number, number]] = [
   [128.0, 30.5],
-  [146.2, 41.9],
+  [146.8, 45.9],
 ]
 
 export const REGION_VIEW_BOUNDS: Record<RegionId, [[number, number], [number, number]]> = {
+  hokkaido: [
+    [139.2, 41.3],
+    [146.7, 45.9],
+  ],
   kyushu: [
     [128.1, 30.8],
     [132.3, 34.4],

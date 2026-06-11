@@ -40,11 +40,22 @@ describe('HomePage shell', () => {
     expect(screen.getByText(/Shimazu Yoshihisa/i)).toBeInTheDocument()
   })
 
+  it('switches to Hokkaido and shows Ezochi frontier content', async () => {
+    const user = userEvent.setup()
+    render(<HomePage />)
+
+    await user.click(screen.getByRole('button', { name: /北海道地方/i }))
+
+    expect(screen.getByRole('heading', { name: /北海道地方/i })).toBeInTheDocument()
+    expect(screen.getAllByText(/Ezochi/i).length).toBeGreaterThan(0)
+    expect(screen.getByText(/Matsumae Yoshihiro/i)).toBeInTheDocument()
+  })
+
   it('renders the legend and expanded coverage note', () => {
     render(<HomePage />)
 
     expect(screen.getByText(/Coverage/i)).toBeInTheDocument()
-    expect(screen.getByText(/近畿・中国・四国・九州・中部・関東・東北/i)).toBeInTheDocument()
+    expect(screen.getByText(/近畿・関東・中部・中国・四国・九州・東北・北海道/i)).toBeInTheDocument()
     expect(screen.getByText(/Hover/i)).toBeInTheDocument()
     expect(screen.getByText(/Selected/i)).toBeInTheDocument()
   })

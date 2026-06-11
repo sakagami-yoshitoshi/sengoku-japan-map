@@ -197,6 +197,31 @@ export const regions: RegionData[] = [
     },
     ui: { svgRegionIds: ['tohoku'], theme: 'gold' },
   },
+  {
+    id: 'hokkaido',
+    modern: { ja: '北海道地方', romaji: 'Hokkaido' },
+    prefectures: [
+      { ja: '北海道', romaji: 'Hokkaido' },
+    ],
+    historical: {
+      oldProvinces: [
+        { ja: '蝦夷地', romaji: 'Ezochi' },
+        { ja: '渡島半島', romaji: 'Oshima Peninsula' },
+        { ja: '松前', romaji: 'Matsumae' },
+        { ja: '上ノ国', romaji: 'Kaminokuni' },
+      ],
+      keyFigures: [
+        { ja: '松前慶広', romaji: 'Matsumae Yoshihiro' },
+        { ja: '蠣崎季広', romaji: 'Kakizaki Suehiro' },
+        { ja: '豊臣秀吉', romaji: 'Toyotomi Hideyoshi' },
+      ],
+      summary: {
+        ja: '戦国末期の北海道は蝦夷地として和人拠点とアイヌ勢力が接する北方辺境であり、1590年には豊臣秀吉が松前氏の所領と守備役を公認して全国秩序へ組み込んだ。',
+        romaji: 'At the end of the Sengoku age, Hokkaido was the northern frontier of Ezochi, where Wajin footholds met Ainu power. In 1590, Toyotomi Hideyoshi recognized the Matsumae domain and its defensive role, bringing the region into the late unification order.',
+      },
+    },
+    ui: { svgRegionIds: ['hokkaido'], theme: 'indigo' },
+  },
 ]
 
 export const defaultRegionId: RegionId = 'kinki'
