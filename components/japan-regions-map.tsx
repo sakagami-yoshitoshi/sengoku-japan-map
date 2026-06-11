@@ -1,3 +1,7 @@
+'use client'
+
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { JAPAN_BOUNDS, OSM_RASTER_STYLE, REGION_BOUNDS, REGION_FEATURE_COLLECTION } from '@/lib/map/region-map-data'
 import { RegionData, RegionId } from '@/types/region'
 
 type Props = {
@@ -8,123 +12,192 @@ type Props = {
   onSelect: (id: RegionId) => void
 }
 
-type RegionVisual = {
-  top: string
-  left: string
-  width: string
-  height: string
-  clipPath: string
-  labelClassName: string
-}
-
-const regionLayout: Record<RegionId, RegionVisual> = {
-  kyushu: {
-    top: '56%',
-    left: '11%',
-    width: '17%',
-    height: '18%',
-    clipPath: 'polygon(20% 24%, 56% 8%, 83% 24%, 92% 54%, 76% 88%, 34% 96%, 8% 70%, 6% 42%)',
-    labelClassName: 'flex h-full flex-col items-center justify-center px-2 text-center',
-  },
-  chugoku: {
-    top: '42%',
-    left: '19%',
-    width: '18%',
-    height: '16%',
-    clipPath: 'polygon(8% 44%, 24% 16%, 66% 12%, 92% 30%, 96% 62%, 70% 88%, 28% 90%, 6% 64%)',
-    labelClassName: 'flex h-full flex-col items-center justify-center px-2 text-center',
-  },
-  shikoku: {
-    top: '61%',
-    left: '31%',
-    width: '15%',
-    height: '10%',
-    clipPath: 'polygon(8% 50%, 28% 24%, 76% 18%, 94% 50%, 74% 82%, 28% 84%)',
-    labelClassName: 'flex h-full flex-col items-center justify-center px-2 text-center',
-  },
-  kinki: {
-    top: '43%',
-    left: '34%',
-    width: '19%',
-    height: '18%',
-    clipPath: 'polygon(18% 18%, 63% 6%, 90% 26%, 84% 72%, 48% 94%, 8% 70%, 10% 34%)',
-    labelClassName: 'flex h-full flex-col items-center justify-center px-2 text-center',
-  },
-  chubu: {
-    top: '27%',
-    left: '47%',
-    width: '24%',
-    height: '23%',
-    clipPath: 'polygon(8% 40%, 20% 16%, 53% 6%, 83% 14%, 95% 40%, 81% 76%, 46% 95%, 14% 82%)',
-    labelClassName: 'flex h-full flex-col items-center justify-center px-3 text-center',
-  },
-  kanto: {
-    top: '26%',
-    left: '71%',
-    width: '18%',
-    height: '21%',
-    clipPath: 'polygon(12% 24%, 44% 8%, 78% 19%, 92% 48%, 84% 82%, 42% 96%, 12% 74%, 4% 42%)',
-    labelClassName: 'flex h-full flex-col items-center justify-center px-2 text-center',
-  },
-  tohoku: {
-    top: '10%',
-    left: '69%',
-    width: '19%',
-    height: '16%',
-    clipPath: 'polygon(20% 30%, 44% 8%, 78% 14%, 94% 40%, 86% 80%, 46% 94%, 12% 72%, 4% 44%)',
-    labelClassName: 'flex h-full flex-col items-center justify-center px-2 text-center',
-  },
-}
+const REGION_SOURCE_ID = 'sengoku-regions'
+const REGION_FILL_LAYER_ID = 'sengoku-regions-fill'
+const REGION_LINE_LAYER_ID = 'sengoku-regions-line'
 
 export function JapanRegionsMap({ regions, selectedRegionId, hoveredRegionId, onHover, onSelect }: Props) {
+  const mapContainerRef = useRef<HTMLDivElement | null>(null)
+  const mapRef = useRef<any>(null)
+  const loadedRef = useRef(false)
+  const onHoverRef = useRef(onHover)
+  const onSelectRef = useRef(onSelect)
+  const [mapError, setMapError] = useState<string | null>(null)
+  const [mapReady, setMapReady] = useState(false)
+
+  const isJsdom = typeof navigator !== 'undefined' && /jsdom/i.test(navigator.userAgent)
+
+  const quickJumpLabel = useMemo(() => 'MapLibre GL · OpenStreetMap geographic stage', [])
+
+  useEffect(() => {
+    onHoverRef.current = onHover
+    onSelectRef.current = onSelect
+  }, [onHover, onSelect])
+
+  useEffect(() => {
+    if (isJsdom || !mapContainerRef.current || mapRef.current) {
+      return
+    }
+
+    let cancelled = false
+
+    const initializeMap = async () => {
+      try {
+        const maplibregl = (await import('maplibre-gl')).default
+        if (cancelled || !mapContainerRef.current) {
+          return
+        }
+
+        const map = new maplibregl.Map({
+          center: [137.9, 36.2],
+          container: mapContainerRef.current,
+          cooperativeGestures: true,
+          dragRotate: false,
+          maxZoom: 8,
+          minZoom: 3.6,
+          pitchWithRotate: false,
+          style: OSM_RASTER_STYLE as any,
+          touchPitch: false,
+          zoom: 4.45,
+        })
+
+        map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), 'top-right')
+        mapRef.current = map
+
+        map.on('load', () => {
+          if (cancelled) return
+
+          loadedRef.current = true
+
+          if (!map.getSource(REGION_SOURCE_ID)) {
+            map.addSource(REGION_SOURCE_ID, {
+              type: 'geojson',
+              data: REGION_FEATURE_COLLECTION as any,
+              promoteId: 'regionId',
+            })
+          }
+
+          map.addLayer({
+            id: REGION_FILL_LAYER_ID,
+            type: 'fill',
+            source: REGION_SOURCE_ID,
+            paint: {
+              'fill-color': [
+                'match',
+                ['get', 'theme'],
+                'crimson', '#c2410c',
+                'indigo', '#4338ca',
+                '#b88a3b',
+              ],
+              'fill-opacity': [
+                'case',
+                ['boolean', ['feature-state', 'selected'], false], 0.52,
+                ['boolean', ['feature-state', 'hovered'], false], 0.38,
+                0.2,
+              ],
+            },
+          })
+
+          map.addLayer({
+            id: REGION_LINE_LAYER_ID,
+            type: 'line',
+            source: REGION_SOURCE_ID,
+            paint: {
+              'line-color': [
+                'case',
+                ['boolean', ['feature-state', 'selected'], false], '#fde68a',
+                ['boolean', ['feature-state', 'hovered'], false], '#fdba74',
+                '#f3d49b',
+              ],
+              'line-opacity': 0.9,
+              'line-width': [
+                'case',
+                ['boolean', ['feature-state', 'selected'], false], 3,
+                ['boolean', ['feature-state', 'hovered'], false], 2.2,
+                1.4,
+              ],
+            },
+          })
+
+          map.on('click', REGION_FILL_LAYER_ID, (event: any) => {
+            const regionId = event.features?.[0]?.properties?.regionId as RegionId | undefined
+            if (!regionId) return
+            onSelectRef.current(regionId)
+            fitToRegion(regionId)
+          })
+
+          map.on('mousemove', REGION_FILL_LAYER_ID, (event: any) => {
+            const regionId = event.features?.[0]?.properties?.regionId as RegionId | undefined
+            map.getCanvas().style.cursor = regionId ? 'pointer' : ''
+            onHoverRef.current(regionId ?? null)
+          })
+
+          map.on('mouseleave', REGION_FILL_LAYER_ID, () => {
+            map.getCanvas().style.cursor = ''
+            onHoverRef.current(null)
+          })
+
+          map.fitBounds(JAPAN_BOUNDS, { duration: 0, padding: 28 })
+          setMapReady(true)
+        })
+
+        map.on('error', (event: any) => {
+          const detail = event?.error?.message ?? event?.error?.statusText ?? 'Unknown map error'
+          console.error('Map stage error:', detail, event)
+          setMapError(`Map layer failed to load: ${detail}`)
+        })
+      } catch {
+        setMapError('MapLibre GL failed to initialize in this environment.')
+      }
+    }
+
+    initializeMap()
+
+    return () => {
+      cancelled = true
+      loadedRef.current = false
+      setMapReady(false)
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+      }
+    }
+  }, [isJsdom])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !loadedRef.current) {
+      return
+    }
+
+    for (const region of regions) {
+      map.setFeatureState(
+        { source: REGION_SOURCE_ID, id: region.id },
+        {
+          hovered: hoveredRegionId === region.id,
+          selected: selectedRegionId === region.id,
+        },
+      )
+    }
+  }, [hoveredRegionId, regions, selectedRegionId])
+
+  const fitToRegion = (regionId: RegionId) => {
+    const map = mapRef.current
+    const bounds = REGION_BOUNDS[regionId]
+    if (!map || !bounds || !loadedRef.current) {
+      return
+    }
+
+    map.fitBounds(bounds, {
+      duration: 900,
+      padding: { top: 52, right: 40, bottom: 52, left: 40 },
+    })
+  }
+
   return (
-    <div className="relative aspect-[23/14] w-full overflow-hidden rounded-[2rem] border border-amber-900/25 bg-[#16110f]">
-      <svg viewBox="0 0 920 560" className="absolute inset-0 h-full w-full" aria-hidden="true">
-        <defs>
-          <linearGradient id="sea" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stopColor="#100c0a" />
-            <stop offset="45%" stopColor="#1a1310" />
-            <stop offset="100%" stopColor="#241914" />
-          </linearGradient>
-          <linearGradient id="land" x1="0" x2="1" y1="0" y2="0">
-            <stop offset="0%" stopColor="#2b231d" />
-            <stop offset="40%" stopColor="#3b2d24" />
-            <stop offset="100%" stopColor="#4b382b" />
-          </linearGradient>
-          <radialGradient id="goldGlow" cx="50%" cy="42%" r="65%">
-            <stop offset="0%" stopColor="#a46c30" stopOpacity="0.24" />
-            <stop offset="100%" stopColor="#a46c30" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-
-        <rect width="920" height="560" rx="32" fill="url(#sea)" />
-        <rect width="920" height="560" rx="32" fill="url(#goldGlow)" />
-
-        <g opacity="0.95">
-          <path d="M126 308C164 280 201 248 231 221C252 203 278 181 314 177C345 173 360 162 376 141C393 118 427 108 473 108C523 108 575 112 611 124C654 138 690 145 731 153C770 160 808 176 832 203C818 214 804 225 789 234C761 252 744 271 733 289C717 314 699 332 666 344C629 358 615 384 585 397C550 413 512 407 472 390C432 373 401 359 365 358C333 357 305 369 270 369C223 369 176 350 126 308Z" fill="url(#land)" />
-          <path d="M730 153C766 129 796 118 830 116C820 144 816 165 820 188C800 180 784 173 768 169C752 165 742 160 730 153Z" fill="url(#land)" opacity="0.92" />
-          <path d="M825 106C839 92 856 84 875 84C868 105 868 118 874 129C855 128 839 121 825 106Z" fill="url(#land)" opacity="0.82" />
-          <path d="M363 380C384 392 397 408 399 430C373 430 350 424 332 408C340 395 349 387 363 380Z" fill="url(#land)" opacity="0.78" />
-          <path d="M165 416C190 398 222 392 248 398C246 423 235 446 214 462C193 454 175 440 165 416Z" fill="url(#land)" opacity="0.82" />
-        </g>
-
-        <g opacity="0.42" stroke="#8c6b4f" strokeWidth="3" fill="none">
-          <path d="M128 309C168 280 203 247 231 221C251 203 279 181 314 177C346 173 361 161 376 141C393 119 428 108 473 108C523 108 574 112 611 124C655 138 689 145 731 153" />
-          <path d="M732 153C771 130 801 119 830 116" />
-          <path d="M270 369C304 369 333 357 365 358C401 359 432 373 472 390C512 407 549 413 585 397C616 383 629 358 666 344" />
-          <path d="M168 416C189 401 219 396 244 401" />
-        </g>
-
-        <g opacity="0.15" stroke="#f4d8a3" strokeWidth="1.5" fill="none">
-          <path d="M100 440C152 406 204 390 262 388" />
-          <path d="M448 82C558 82 659 106 742 145" />
-          <path d="M620 438C696 410 755 366 806 310" />
-        </g>
-      </svg>
-
-      <div className="absolute inset-0">
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
         {regions.map((region) => {
-          const box = regionLayout[region.id]
           const active = selectedRegionId === region.id
           const hovered = hoveredRegionId === region.id
 
@@ -135,35 +208,48 @@ export function JapanRegionsMap({ regions, selectedRegionId, hoveredRegionId, on
               aria-label={region.modern.ja}
               aria-pressed={active}
               className={[
-                'absolute overflow-hidden text-left transition duration-200 ease-out',
+                'rounded-full border px-3 py-2 text-sm transition duration-150 ease-out',
                 'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-200/80',
                 active
-                  ? 'bg-amber-700/78 text-amber-50 shadow-[0_0_0_1px_rgba(255,235,180,0.32),0_20px_44px_rgba(0,0,0,0.34)]'
+                  ? 'border-amber-200 bg-amber-700/70 text-amber-50'
                   : hovered
-                    ? 'bg-orange-800/72 text-orange-50 shadow-[0_16px_32px_rgba(0,0,0,0.22)]'
-                    : 'bg-stone-800/62 text-stone-100 hover:bg-stone-700/82',
+                    ? 'border-orange-300/60 bg-orange-800/55 text-orange-50'
+                    : 'border-amber-900/30 bg-stone-900/70 text-stone-200 hover:border-amber-700/60 hover:bg-stone-800/80',
               ].join(' ')}
-              style={{
-                top: box.top,
-                left: box.left,
-                width: box.width,
-                height: box.height,
-                clipPath: box.clipPath,
-                border: active ? '2px solid rgba(251, 228, 176, 0.95)' : '1px solid rgba(188, 140, 87, 0.7)',
-              }}
               onMouseEnter={() => onHover(region.id)}
               onMouseLeave={() => onHover(null)}
               onFocus={() => onHover(region.id)}
               onBlur={() => onHover(null)}
-              onClick={() => onSelect(region.id)}
+              onClick={() => {
+                onSelect(region.id)
+                fitToRegion(region.id)
+              }}
             >
-              <span className={box.labelClassName}>
-                <span className="block text-sm font-semibold leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)] sm:text-base lg:text-lg">{region.modern.ja}</span>
-                <span className="mt-1 block text-[10px] uppercase tracking-[0.18em] opacity-90 sm:mt-2 sm:text-[11px] lg:text-xs">{region.modern.romaji}</span>
-              </span>
+              {region.modern.ja}
             </button>
           )
         })}
+      </div>
+
+      <div className="relative h-[420px] overflow-hidden rounded-[2rem] border border-amber-900/25 bg-[#120f0d] sm:h-[480px] lg:h-[560px]">
+        <div ref={mapContainerRef} className="h-full w-full" />
+
+        <div className="pointer-events-none absolute left-4 top-4 rounded-full border border-amber-900/30 bg-black/45 px-3 py-1.5 text-[11px] uppercase tracking-[0.24em] text-amber-100/90 backdrop-blur">
+          {quickJumpLabel}
+        </div>
+
+        {!mapReady && !mapError ? (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-gradient-to-br from-stone-950/70 to-stone-900/30 text-sm text-stone-300">
+            Loading geographic map stage...
+          </div>
+        ) : null}
+
+        {mapError ? (
+          <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-orange-500/30 bg-black/70 p-4 text-sm leading-6 text-orange-100 backdrop-blur">
+            <p className="font-semibold text-orange-200">Map stage warning</p>
+            <p className="mt-1">{mapError}</p>
+          </div>
+        ) : null}
       </div>
     </div>
   )
