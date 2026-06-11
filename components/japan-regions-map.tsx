@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { OSM_RASTER_STYLE, REGION_FEATURE_COLLECTION } from '@/lib/map/region-map-data'
+import { OSM_RASTER_STYLE } from '@/lib/map/osm-raster-style'
 import { JAPAN_VIEW_BOUNDS, REGION_VIEW_BOUNDS } from '@/lib/map/region-view-bounds'
 import { RegionData, RegionId } from '@/types/region'
 
@@ -44,7 +44,10 @@ export function JapanRegionsMap({ regions, selectedRegionId, hoveredRegionId, on
 
     const initializeMap = async () => {
       try {
-        const maplibregl = (await import('maplibre-gl')).default
+        const [{ default: maplibregl }, { REGION_FEATURE_COLLECTION }] = await Promise.all([
+          import('maplibre-gl'),
+          import('@/lib/map/region-map-data'),
+        ])
         if (cancelled || !mapContainerRef.current) {
           return
         }
