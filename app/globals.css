@@ -21,6 +21,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  overflow: hidden;
   background:
     radial-gradient(circle at top left, rgba(130, 79, 34, 0.22), transparent 28%),
     radial-gradient(circle at bottom right, rgba(89, 46, 30, 0.18), transparent 24%),
@@ -55,6 +56,10 @@ button {
   font: inherit;
 }
 
+.sengoku-shell {
+  height: 100vh;
+}
+
 .sengoku-surface {
   box-shadow:
     inset 0 1px 0 rgba(255, 224, 179, 0.03),
@@ -73,6 +78,12 @@ button {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  .landscape-enforcer {
+    display: flex;
   }
 }
 

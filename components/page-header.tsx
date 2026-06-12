@@ -1,12 +1,15 @@
 export function PageHeader() {
   return (
-    <header className="mb-8 max-w-3xl">
-      <p className="text-xs uppercase tracking-[0.45em] text-amber-400/80">Modern Entry / Sengoku Layer</p>
-      <h1 className="mt-3 text-5xl font-semibold text-amber-50 md:text-6xl">戦国日本地図</h1>
-      <p className="mt-3 text-xl text-amber-200">Sengoku Japan Map</p>
-      <p className="mt-5 max-w-2xl text-base leading-8 text-stone-300">
-        現代日本の行政区分を入口にして、戦国時代の旧国名と代表的大名・武将をたどる双語インタラクティブ地図。
-      </p>
+    <header className="mb-3 flex items-end justify-between gap-4 rounded-[1.5rem] border border-amber-900/25 bg-stone-950/58 px-5 py-4 backdrop-blur md:mb-4 md:px-6 md:py-4.5">
+      <div className="min-w-0">
+        <p className="text-sm uppercase tracking-[0.32em] text-amber-400/85 md:text-[0.95rem]">
+          Modern Entry / Sengoku Layer
+        </p>
+        <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1.5">
+          <h1 className="text-3xl font-semibold text-amber-50 md:text-[2.2rem]">戦国日本地図</h1>
+          <p className="text-lg text-amber-200 md:text-xl">Sengoku Japan Map</p>
+        </div>
+      </div>
     </header>
   )
 }
