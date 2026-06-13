@@ -19,10 +19,9 @@ const PREFECTURE_SOURCE_ID = 'sengoku-prefectures'
 const PREFECTURE_FILL_LAYER_ID = 'sengoku-prefectures-fill'
 const PREFECTURE_LINE_LAYER_ID = 'sengoku-prefectures-line'
 
-const MAIN_ISLAND_BOUNDS: [[number, number], [number, number]] = [
-  [129.2, 31.0],
-  [145.8, 45.6],
-]
+const DEFAULT_BEARING = -18
+const DEFAULT_JAPAN_CENTER: [number, number] = [137, 37]
+const DEFAULT_JAPAN_ZOOM = 5.2
 
 function ensureMapSized(map: any) {
   try {
@@ -39,16 +38,14 @@ function publishMapState(map: any) {
   }
 }
 
-const DEFAULT_BEARING = -18
-
 function fitToJapan(map: any, duration: number) {
   ensureMapSized(map)
   map.easeTo({
     bearing: DEFAULT_BEARING,
-    center: [139.35, 37.6],
+    center: DEFAULT_JAPAN_CENTER,
     duration,
     essential: true,
-    zoom: 4.28,
+    zoom: DEFAULT_JAPAN_ZOOM,
   })
 }
 
@@ -102,7 +99,7 @@ export function JapanRegionsMap({
 
         const map = new maplibregl.Map({
           bearing: DEFAULT_BEARING,
-          center: [139.35, 37.6],
+          center: DEFAULT_JAPAN_CENTER,
           container: mapContainerRef.current,
           cooperativeGestures: true,
           dragRotate: false,
@@ -111,7 +108,7 @@ export function JapanRegionsMap({
           pitchWithRotate: false,
           style: OSM_RASTER_STYLE as any,
           touchPitch: false,
-          zoom: 4.28,
+          zoom: DEFAULT_JAPAN_ZOOM,
         })
 
         map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), 'top-right')

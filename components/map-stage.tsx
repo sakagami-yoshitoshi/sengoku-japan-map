@@ -16,7 +16,7 @@ export function MapStage(props: {
     <section className="sengoku-surface relative flex min-h-0 flex-1 overflow-hidden rounded-[2rem] border border-amber-900/25 bg-stone-900/70 p-2 shadow-2xl shadow-black/25 backdrop-blur md:p-3">
       <div className="grid h-full min-h-0 w-full gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(21rem,2fr)] lg:gap-4">
         <div className="flex min-h-0 min-w-0 items-center justify-center overflow-hidden rounded-[1.8rem] border border-amber-900/20 bg-[#120f0d] p-2 lg:p-3">
-          <div className="aspect-[3/2] h-auto max-h-full w-full max-w-full overflow-hidden rounded-[1.5rem] border border-amber-900/20 bg-[#120f0d] lg:h-full lg:w-auto lg:min-w-0">
+          <div className="aspect-[13/10] h-auto max-h-full w-full max-w-full overflow-hidden rounded-[1.5rem] border border-amber-900/20 bg-[#120f0d] lg:h-full lg:w-auto lg:min-w-0">
             <JapanRegionsMap
               hoveredPrefectureId={props.hoveredPrefectureId}
               prefectures={prefectures}
@@ -77,7 +77,7 @@ export function MapStage(props: {
                   <p className="text-[12px] uppercase tracking-[0.28em] text-amber-300/80">Map Guidance</p>
                   <h3 className="mt-2.5 text-2xl font-semibold text-amber-50">先点击左侧地图</h3>
                   <p className="mt-3 text-base leading-8 text-stone-300">
-                    默认视图现在优先把北海道到九州的本岛对角线尽量撑满画面，并主动压低北方四岛、西南诸岛、东京离岛与大陆边缘的存在感。
+                    默认视图现在按参考图保留完整全国构图：北海道完整出现，四大岛以斜向主轴铺开，同时保留适量海域与大陆边缘作为空间参照。
                   </p>
                 </div>
 
